@@ -1,5 +1,6 @@
 {  
     "compilerOptions": {  
+        "types": ["node", "jest"],
         "outDir": "dist",  
         "module": "commonjs",  
         "target": "es2022",  
