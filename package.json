@@ -4,8 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "prepare": "husky",
+    "start": "node dist/main/server.js",  
+    "build": "rimraf dist && tsc -p tsconfig-build.json",  
+    "debug": "nodemon -L --watch ./dist --inspect=0.0.0.0:9222 --nolazy ./dist/main/server.js",
+    "up": "npm run build && docker-compose up -d",  
+    "down": "docker-compose down", 
+    "dev": "sucrase-node src/main/server.ts",  
+    "test": "jest --passWithNoTests --silent --noStackTrace --runInBand",  
+    "test:verbose": "jest --passWithNoTests --runInBand",  
+    "test:unit": "jest --watch -- -c jest-unit-config.js",  
+    "test:integration": "jest --watch -- -c jest-integration-config.js",  
+    "test:staged": "npm test -- --findRelatedTests",  
+    "test:ci": "npm test -- --coverage",  
+    "test:coveralls": "npm run test:ci && coveralls < coverage/lcov.info"
   },
   "keywords": [],
   "author": "",
