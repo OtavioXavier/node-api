@@ -13,12 +13,7 @@ const makeHasher = () => {
 const makeAddAccountRepository = () => {
     class AddAccountRepositoryStub implements AddAccountRepository {
     async add(accountData: addAccountModel): Promise<AccountModel> {
-        return new Promise(resolve => resolve( {
-            id: 'valid_id',
-            name: 'valid_name',
-            email: 'valid_email',
-            password: 'valid_password'
-        })
+        return new Promise(resolve => resolve(makeFakeAccount())
         )
     }
 }
@@ -39,6 +34,7 @@ const makeSut = () => {
     
         async add(account: addAccountModel): Promise<AccountModel> {
             const hashedPassword = await this.hasher.hash(account.password);
+            account.password = hashedPassword;
             return this.addAccountRepository.add(account);
         }
     
@@ -59,6 +55,13 @@ const makeFakeAccountData = ():addAccountModel => ({
         password: 'valid_password'
 })
 
+const makeFakeAccount = ():AccountModel => ({
+        id: 'valid_id',
+        name: 'valid_name',
+        email: 'valid_email',
+        password: 'hashed_password'
+})
+
 
 describe('DBAddAccount', () => {
     it('Shold call Hasher with correct password', async () => {
@@ -75,8 +78,14 @@ describe('DBAddAccount', () => {
         expect(addSpy).toHaveBeenCalledWith({
             name: 'valid_name',
             email: 'valid_email',
-            password: 'valid_password'
+            password: 'hashed_password'
         })
     });
 
+
+    it('Shold return a created account on success', async () => {
+        const {sut} = makeSut();
+        const createdAccount = await sut.add(makeFakeAccountData());
+        expect(createdAccount).toEqual(makeFakeAccount());
+    });
 });
