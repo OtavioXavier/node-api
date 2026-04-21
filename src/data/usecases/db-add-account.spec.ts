@@ -1,4 +1,5 @@
-import { AccountModel, AddAccount, addAccountModel, AddAccountRepository, Hasher } from "./db-add-account-protocols";
+import { DBAddAccount } from "./db-add-account";
+import { AccountModel, addAccountModel, AddAccountRepository, Hasher } from "./db-add-account-protocols";
 
 const makeHasher = () => {
     class HasherStub implements Hasher {
@@ -25,21 +26,6 @@ const makeSut = () => {
     const hasherStub = makeHasher();
     const addAccountRepositoryStub = makeAddAccountRepository();
 
-    class DBAddAccount implements AddAccount{
-    
-        constructor (private addAccountRepository: AddAccountRepository, private hasher: Hasher) {
-            this.addAccountRepository = addAccountRepository;
-            this.hasher = hasher;
-        }
-    
-        async add(account: addAccountModel): Promise<AccountModel> {
-            const hashedPassword = await this.hasher.hash(account.password);
-            account.password = hashedPassword;
-            return this.addAccountRepository.add(account);
-        }
-    
-    }
-
     const dbAddAccount = new DBAddAccount(addAccountRepositoryStub, hasherStub);
 
     return {
@@ -62,7 +48,6 @@ const makeFakeAccount = ():AccountModel => ({
         password: 'hashed_password'
 })
 
-
 describe('DBAddAccount', () => {
     it('Shold call Hasher with correct password', async () => {
         const {sut, hasherStub} = makeSut();
@@ -81,7 +66,6 @@ describe('DBAddAccount', () => {
             password: 'hashed_password'
         })
     });
-
 
     it('Shold return a created account on success', async () => {
         const {sut} = makeSut();
