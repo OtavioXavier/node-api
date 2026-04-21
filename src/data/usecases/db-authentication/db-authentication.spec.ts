@@ -41,4 +41,14 @@ describe("DBAuthentication", () => {
     await sut.auth({ email: "valid@email.com", password: "valid_password" });
     expect(spy).toHaveBeenCalledWith("valid@email.com");
   });
+
+  it("Shold return null if LoadAccountByRepository return null", async () => {
+    const { sut, loadEmailRepository } = makeSut();
+    jest.spyOn(loadEmailRepository, "loadByEmail").mockResolvedValueOnce(null);
+    const invalidAccessToken = await sut.auth({
+      email: "invalid@email.com",
+      password: "any_password",
+    });
+    expect(invalidAccessToken).toBeNull();
+  });
 });
