@@ -1,12 +1,14 @@
 import {
   type Authentication,
   type AuthenticationModel,
+  HashComparater,
   LoadAccountByEmailRepository,
 } from "./db-authentication-protocols";
 
 export class DBAuthentication implements Authentication {
   constructor(
     private readonly loadAccountByRepository: LoadAccountByEmailRepository,
+    private readonly hashComparater: HashComparater,
   ) {
     this.loadAccountByRepository = loadAccountByRepository;
   }
@@ -15,7 +17,13 @@ export class DBAuthentication implements Authentication {
       credentials.email,
     );
     if (account != null) {
-      return new Promise((resolve) => resolve("valid_token"));
+      const isTheSamePassword = await this.hashComparater.compare(
+        credentials.password,
+        account.password,
+      );
+      if (isTheSamePassword) {
+        return new Promise((resolve) => resolve("valid_token"));
+      }
     }
     return null;
   }
