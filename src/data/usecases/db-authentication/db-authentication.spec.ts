@@ -93,7 +93,7 @@ describe("DBAuthentication", () => {
     const { sut, hashComparer } = makeSut();
     jest.spyOn(hashComparer, "compare").mockResolvedValueOnce(false);
     const invalidAccessToken = await sut.auth({
-      email: "invalid@email.com",
+      email: "any@email.com",
       password: "incorrect_password",
     });
     expect(invalidAccessToken).toBeNull();
@@ -104,5 +104,14 @@ describe("DBAuthentication", () => {
     const spy = jest.spyOn(encrypter, "encrypt");
     await sut.auth({ email: "valid@email.com", password: "valid_password" });
     expect(spy).toHaveBeenCalledWith("any_id");
+  });
+
+  it("Shold return a token with success", async () => {
+    const { sut } = makeSut();
+    const accessToken = await sut.auth({
+      email: "valid@email.com",
+      password: "valid_password",
+    });
+    expect(accessToken).toEqual("access_token");
   });
 });
