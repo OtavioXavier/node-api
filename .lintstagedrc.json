@@ -5,5 +5,5 @@
     "prettier --write --ignore-unknown",
     "git add"
   ],
-  "**/*.json": ["prettier --write --ignore-unknown"]
+  "**/*.json": ["prettier --write --ignore-unknown", "git add"]
 }
