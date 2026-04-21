@@ -4,7 +4,15 @@ import {
   Encrypter,
   HashComparater,
   LoadAccountByEmailRepository,
+  UpdateAccesTokenRepository,
 } from "./db-authentication-protocols";
+
+const makeUpdateAccessTokenStub = (): UpdateAccesTokenRepository => {
+  class UpdateAccesTokenStub implements UpdateAccesTokenRepository {
+    async updateAccessToken(id: string, accessToken: string): Promise<void> {}
+  }
+  return new UpdateAccesTokenStub();
+};
 
 const makeEncrypter = (): Encrypter => {
   class EncrypterStub implements Encrypter {
@@ -44,16 +52,19 @@ type Sut = {
   loadEmailRepository: LoadAccountByEmailRepository;
   hashComparer: HashComparater;
   encrypter: Encrypter;
+  updateAccessToken: UpdateAccesTokenRepository;
 };
 
 const makeSut = (): Sut => {
   const loadEmailRepository = makeLoadAccountByEmailRepository();
   const hashComparer = makeHashComparater();
   const encrypter = makeEncrypter();
+  const updateAccessToken = makeUpdateAccessTokenStub();
   const sut = new DBAuthentication(
     loadEmailRepository,
     hashComparer,
     encrypter,
+    updateAccessToken,
   );
 
   return {
@@ -61,6 +72,7 @@ const makeSut = (): Sut => {
     loadEmailRepository,
     hashComparer,
     encrypter,
+    updateAccessToken,
   };
 };
 
@@ -113,5 +125,12 @@ describe("DBAuthentication", () => {
       password: "valid_password",
     });
     expect(accessToken).toEqual("access_token");
+  });
+
+  it("Shold call UpdateAcessToken with correct values", async () => {
+    const { sut, updateAccessToken } = makeSut();
+    const spy = jest.spyOn(updateAccessToken, "updateAccessToken");
+    await sut.auth({ email: "valid@email.com", password: "valid_password" });
+    expect(spy).toHaveBeenCalledWith("any_id", "access_token");
   });
 });

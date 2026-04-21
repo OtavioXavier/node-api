@@ -4,6 +4,7 @@ import {
   Encrypter,
   HashComparater,
   LoadAccountByEmailRepository,
+  UpdateAccesTokenRepository,
 } from "./db-authentication-protocols";
 
 export class DBAuthentication implements Authentication {
@@ -11,10 +12,12 @@ export class DBAuthentication implements Authentication {
     private readonly loadAccountByRepository: LoadAccountByEmailRepository,
     private readonly hashComparater: HashComparater,
     private readonly encrypter: Encrypter,
+    private readonly updateAccessToken: UpdateAccesTokenRepository,
   ) {
     this.loadAccountByRepository = loadAccountByRepository;
     this.hashComparater = hashComparater;
     this.encrypter = encrypter;
+    this.updateAccessToken = updateAccessToken;
   }
   async auth(credentials: AuthenticationModel): Promise<string> {
     const account = await this.loadAccountByRepository.loadByEmail(
@@ -26,7 +29,9 @@ export class DBAuthentication implements Authentication {
         account.password,
       );
       if (isTheSamePassword) {
-        return this.encrypter.encrypt(account.id);
+        const accessToken = await this.encrypter.encrypt(account.id);
+        await this.updateAccessToken.updateAccessToken(account.id, accessToken);
+        return accessToken;
       }
     }
     return null;
