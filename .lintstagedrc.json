@@ -1,6 +1,8 @@
 {
     ".ts": [
         "eslint 'src/**' --fix",
-        "npm run test:staged"
+        "npm run test:staged",
+        "prettier --write --ignore-unknown",
+        "git add"
     ]
 }
