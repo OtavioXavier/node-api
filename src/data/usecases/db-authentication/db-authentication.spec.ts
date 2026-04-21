@@ -1,17 +1,27 @@
 import { DBAuthentication } from "./db-authentication";
 import {
   AccountModel,
+  Encrypter,
   HashComparater,
   LoadAccountByEmailRepository,
 } from "./db-authentication-protocols";
+
+const makeEncrypter = (): Encrypter => {
+  class EncrypterStub implements Encrypter {
+    async encrypt(value: string): Promise<string> {
+      return new Promise((resolve) => resolve("access_token"));
+    }
+  }
+  return new EncrypterStub();
+};
 
 const makeLoadAccountByEmailRepository = (): LoadAccountByEmailRepository => {
   class LoadAccountByEmailRepositoryStub implements LoadAccountByEmailRepository {
     async loadByEmail(email: string): Promise<AccountModel> {
       const fakeAccount: AccountModel = {
-        id: "valid_id",
-        name: "valid_name",
-        email: "valid_email",
+        id: "any_id",
+        name: "any_name",
+        email: "any_email",
         password: "hashed_password",
       };
       return new Promise((resolve) => resolve(fakeAccount));
@@ -33,17 +43,24 @@ type Sut = {
   sut: DBAuthentication;
   loadEmailRepository: LoadAccountByEmailRepository;
   hashComparer: HashComparater;
+  encrypter: Encrypter;
 };
 
 const makeSut = (): Sut => {
   const loadEmailRepository = makeLoadAccountByEmailRepository();
   const hashComparer = makeHashComparater();
-  const sut = new DBAuthentication(loadEmailRepository, hashComparer);
+  const encrypter = makeEncrypter();
+  const sut = new DBAuthentication(
+    loadEmailRepository,
+    hashComparer,
+    encrypter,
+  );
 
   return {
     sut,
     loadEmailRepository,
     hashComparer,
+    encrypter,
   };
 };
 
@@ -80,5 +97,12 @@ describe("DBAuthentication", () => {
       password: "incorrect_password",
     });
     expect(invalidAccessToken).toBeNull();
+  });
+
+  it("Shold call Encrypter with correct id", async () => {
+    const { sut, encrypter } = makeSut();
+    const spy = jest.spyOn(encrypter, "encrypt");
+    await sut.auth({ email: "valid@email.com", password: "valid_password" });
+    expect(spy).toHaveBeenCalledWith("any_id");
   });
 });
