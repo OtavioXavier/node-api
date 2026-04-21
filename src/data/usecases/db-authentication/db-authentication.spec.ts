@@ -127,7 +127,7 @@ describe("DBAuthentication", () => {
     expect(accessToken).toEqual("access_token");
   });
 
-  it("Shold call UpdateAcessToken with correct values", async () => {
+  it("Shold call UpdateAcessToken with correct id and access token", async () => {
     const { sut, updateAccessToken } = makeSut();
     const spy = jest.spyOn(updateAccessToken, "updateAccessToken");
     await sut.auth({ email: "valid@email.com", password: "valid_password" });
