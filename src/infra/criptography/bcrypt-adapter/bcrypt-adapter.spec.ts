@@ -1,6 +1,5 @@
-import { HashComparater } from "@/data/protocols/criptography/hash-comparater";
-import { Hasher } from "@/data/protocols/criptography/hasher";
 import bcrypt from "bcrypt";
+import { BcryptAdapter } from "./bcrypt-adapter";
 
 jest.mock("bcrypt", () => ({
   async hash(): Promise<string> {
@@ -12,19 +11,6 @@ jest.mock("bcrypt", () => ({
   },
 }));
 const salt = 12;
-
-export class BcryptAdapter implements Hasher, HashComparater {
-  constructor(private readonly salt: number) {
-    this.salt = salt;
-  }
-  async compare(value: string, hash: string): Promise<boolean> {
-    return bcrypt.compare(value, hash);
-  }
-  async hash(value: string): Promise<string> {
-    const hash = bcrypt.hash(value, salt);
-    return hash;
-  }
-}
 
 describe("Bcrypt Adapter", () => {
   it("Shold call hash with the correct password and salt", async () => {
