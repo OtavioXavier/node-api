@@ -22,7 +22,13 @@ describe("Bcrypt Adapter", () => {
   it("Shold call hash with the correct password and salt", async () => {
     const sut = new BcryptAdapter(salt);
     const spy = jest.spyOn(bcrypt, "hash");
-    await sut.hash("valid_password");
-    expect(spy).toHaveBeenCalledWith("valid_password", salt);
+    await sut.hash("any_password");
+    expect(spy).toHaveBeenCalledWith("any_password", salt);
+  });
+
+  it("Shold return a valid hash in success case", async () => {
+    const sut = new BcryptAdapter(salt);
+    const validHash = await sut.hash("valid_password");
+    expect(validHash).toEqual("hash");
   });
 });
