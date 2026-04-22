@@ -46,4 +46,10 @@ describe("Bcrypt Adapter", () => {
     await sut.compare("any_password", "hash");
     expect(spy).toHaveBeenCalledWith("any_password", "hash");
   });
+
+  it("Shold return true on compare success", async () => {
+    const sut = new BcryptAdapter(salt);
+    const isSame = await sut.compare("any_password", "hash");
+    expect(isSame).toBeTruthy();
+  });
 });
