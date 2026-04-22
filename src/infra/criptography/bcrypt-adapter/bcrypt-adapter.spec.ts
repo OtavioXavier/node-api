@@ -50,6 +50,13 @@ describe("Bcrypt Adapter", () => {
   it("Shold return true on compare success", async () => {
     const sut = new BcryptAdapter(salt);
     const isSame = await sut.compare("any_password", "hash");
-    expect(isSame).toBeTruthy();
+    expect(isSame).toBe(true);
+  });
+
+  it("Shold return false on compare fail", async () => {
+    const sut = new BcryptAdapter(salt);
+    jest.spyOn(bcrypt, "compare").mockImplementationOnce(() => false);
+    const isSame = await sut.compare("any_password", "hash");
+    expect(isSame).toBe(false);
   });
 });
