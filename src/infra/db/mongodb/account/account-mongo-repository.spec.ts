@@ -5,6 +5,23 @@ import {
 } from "@/data/usecases/db-add-account/db-add-account-protocols";
 import { MongoHelper } from "../helpers/mongo-helper";
 
+export class AccountMongoRepository implements AddAccountRepository {
+  async add(accountData: addAccountModel): Promise<AccountModel> {
+    return new Promise((resolve) =>
+      resolve({
+        id: "any_id",
+        name: "any_name",
+        email: "any_email",
+        password: "hashed_password",
+      }),
+    );
+  }
+}
+
+const makeSut = (): AccountMongoRepository => {
+  return new AccountMongoRepository();
+};
+
 describe("AccountMongoRepository", () => {
   beforeAll(async () => {
     await MongoHelper.connect(process.env.MONGO_URL);
@@ -19,21 +36,8 @@ describe("AccountMongoRepository", () => {
     await accountCollection.deleteMany({});
   });
 
-  class AccountMongoRepository implements AddAccountRepository {
-    async add(accountData: addAccountModel): Promise<AccountModel> {
-      return new Promise((resolve) =>
-        resolve({
-          id: "any_id",
-          name: "any_name",
-          email: "any_email",
-          password: "hashed_password",
-        }),
-      );
-    }
-  }
-
   it("Shold return account on add with success", async () => {
-    const sut = new AccountMongoRepository();
+    const sut = makeSut();
     const account = await sut.add({
       name: "any_name",
       email: "any_email",
