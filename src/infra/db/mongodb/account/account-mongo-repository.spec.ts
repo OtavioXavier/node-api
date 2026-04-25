@@ -4,11 +4,17 @@ import {
   AddAccountRepository,
 } from "@/data/usecases/db-add-account/db-add-account-protocols";
 import { MongoHelper } from "../helpers/mongo-helper";
-import { LoadAccountByEmailRepository } from "@/data/usecases/db-authentication/db-authentication-protocols";
-import { Collection } from "mongodb";
+import {
+  LoadAccountByEmailRepository,
+  UpdateAccesTokenRepository,
+} from "@/data/usecases/db-authentication/db-authentication-protocols";
+import { Collection, ObjectId } from "mongodb";
 
 export class AccountMongoRepository
-  implements AddAccountRepository, LoadAccountByEmailRepository
+  implements
+    AddAccountRepository,
+    LoadAccountByEmailRepository,
+    UpdateAccesTokenRepository
 {
   async add(accountData: addAccountModel): Promise<AccountModel> {
     const accountCollection = await MongoHelper.getCollection("accounts");
@@ -21,6 +27,14 @@ export class AccountMongoRepository
     const accountCollection = MongoHelper.getCollection("accounts");
     const account = await (await accountCollection).findOne({ email });
     return account && MongoHelper.map(account);
+  }
+
+  async updateAccessToken(id: string, accessToken: string): Promise<void> {
+    const accountCollection = await MongoHelper.getCollection("accounts");
+    await accountCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { accessToken } },
+    );
   }
 }
 
@@ -80,5 +94,21 @@ describe("AccountMongoRepository", () => {
     });
     const account = await sut.loadByEmail("wrong_email@mail.com");
     expect(account).toBeNull();
+  });
+
+  it("Shold update the correct account on updateAccessToken", async () => {
+    const sut = makeSut();
+    await accountCollection.insertOne({
+      name: "any_name",
+      email: "any_email@mail.com",
+      password: "valid_password",
+    });
+    const { _id } = await accountCollection.findOne({
+      email: "any_email@mail.com",
+    });
+    await sut.updateAccessToken(_id.toString(), "access_token");
+    const account = await accountCollection.findOne({ _id });
+    expect(account).toBeTruthy();
+    expect(account.accessToken).toBe("access_token");
   });
 });
