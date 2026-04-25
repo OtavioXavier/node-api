@@ -70,4 +70,15 @@ describe("AccountMongoRepository", () => {
     expect(account.name).toEqual("any_name");
     expect(account.email).toEqual("any_email@mail.com");
   });
+
+  it("Shold return nyll if loadByEmail falhar", async () => {
+    const sut = makeSut();
+    await accountCollection.insertOne({
+      name: "any_name",
+      email: "any_email@mail.com",
+      password: "valid_password",
+    });
+    const account = await sut.loadByEmail("wrong_email@mail.com");
+    expect(account).toBeNull();
+  });
 });
