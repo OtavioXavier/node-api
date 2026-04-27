@@ -7,6 +7,14 @@ const makeSut = (): AccountMongoRepository => {
   return new AccountMongoRepository();
 };
 
+const makeAccountData = (): addAccountModel => {
+  return {
+    name: "any_name",
+    email: "any_email@mail.com",
+    password: "valid_password",
+  };
+};
+
 let accountCollection: Collection;
 
 describe("AccountMongoRepository", () => {
@@ -22,14 +30,6 @@ describe("AccountMongoRepository", () => {
     accountCollection = await MongoHelper.getCollection("accounts");
     await accountCollection.deleteMany({});
   });
-
-  const makeAccountData = (): addAccountModel => {
-    return {
-      name: "any_name",
-      email: "any_email@mail.com",
-      password: "valid_password",
-    };
-  };
 
   it("Shold return account on add with success", async () => {
     const sut = makeSut();
