@@ -23,4 +23,13 @@ describe("LogMongoRepository", () => {
     const count = await errorCollection.countDocuments();
     expect(count).toBe(1);
   });
+
+  it("Shold create a log error with correct date", async () => {
+    const sut = new LogMongoRepository();
+    await sut.logError("any_error");
+    const count = await errorCollection.countDocuments();
+    expect(count).toBe(1);
+    const log = await errorCollection.findOne({});
+    expect(log.date).toBeTruthy();
+  });
 });
